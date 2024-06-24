@@ -1,20 +1,21 @@
 
-const express =require('express')
+const express = require('express')
 const mongoose = require('mongoose');
 require('dotenv').config()
 const cors = require('cors');
-const  Product  = require('./Models/Products');
+const Product = require('./Models/Products');
+const Products = require('./Models/Products');
 
 
 const dburl = process.env.MONGOURL;
 mongoose.connect(dburl)
 const app = express()
-const port = 3000;
+const port = 8000;
 app.use(express.json())
 app.use(cors())
 
 
-app.get('/',(req,res)=>{
+app.get('/', (req, res) => {
     res.end("Server started")
 })
 
@@ -58,11 +59,9 @@ app.get('/products', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-
 // Delete Product
 app.delete('/products/:id', async (req, res) => {
     const { id } = req.params;
-
     try {
         const product = await Product.findByIdAndDelete(id);
 
@@ -76,6 +75,7 @@ app.delete('/products/:id', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
 
 // Update Products
 app.put('/products/:id', async (req, res) => {
@@ -104,8 +104,8 @@ app.put('/products/:id', async (req, res) => {
     }
 });
 
-  
-app.listen(port,()=>{
+
+app.listen(port, () => {
     console.log("Working ", port)
 })
 
