@@ -32,10 +32,8 @@ const ProductSchema = new mongoose.Schema({
         type: String
     }],
     category: {
-        // type: mongoose.Types.ObjectId,
-        // ref: 'Category'
         type: String
     }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Product', ProductSchema); // Ensure the model name is singular 'Product'
+module.exports = mongoose.model('Products', ProductSchema); // Ensure the model name is singular 'Product'
