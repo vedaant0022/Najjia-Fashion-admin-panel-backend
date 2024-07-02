@@ -209,24 +209,6 @@ app.put('/categories/:id', upload.single('image'), async (req, res) => {
       res.status(400).json({ error: error.message });
     }
   });
-// app.put('/categories/:id', async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const updateData = req.body;
-//         const category = await Category.findByIdAndUpdate(id, updateData, {
-//             new: true, // Return the updated document
-//             runValidators: true // Run validators on update
-//         });
-
-//         if (!category) {
-//             return res.status(404).json({ error: 'Category not found' });
-//         }
-
-//         res.status(200).json(category);
-//     } catch (error) {
-//         res.status(400).json({ error: error.message });
-//     }
-// });
 
 // Delete category
 app.delete('/categories/:id', async (req, res) => {
