@@ -5,7 +5,9 @@ require('dotenv').config()
 const cors = require('cors');
 const Product = require('./Models/Products');
 const Products = require('./Models/Products');
+const Categories = require('./Models/Categories');
 const multer = require('multer');
+const Category = require('./Models/Categories');
 const cloudinary = require('cloudinary').v2;
 
 
@@ -29,35 +31,6 @@ app.get('/', (req, res) => {
     res.end("Server started")
 })
 
-// Add Products
-// app.post('/products', async (req, res) => {
-//     const { title, description, price, details, brand, colors, sizes, gender, images, category } = req.body;
-
-//     if (!title || !description || !price) {
-//         return res.status(400).json({ error: 'Title, description, and price are required.' });
-//     }
-
-//     try {
-//         const product = new Product({
-//             title,
-//             description,
-//             price,
-//             details,
-//             brand,
-//             colors,
-//             sizes,
-//             gender,
-//             images,
-//             category
-//         });
-//         await product.save();
-//         res.status(201).json(product);
-//     } catch (error) {
-//         console.log(error);
-//         console.error('Error creating product:', error);
-//         res.status(500).json({ error: 'Internal server error' });
-//     }
-// });
 
 // List Products
 app.get('/products', async (req, res) => {
@@ -69,6 +42,20 @@ app.get('/products', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+// List Products based on id 
+app.get('/products/:id', async (req, res) => {
+    try {
+        const product = await Products.findById(req.params.id);
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+        res.status(200).json(product);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // Delete Product
 app.delete('/products/:id', async (req, res) => {
     const { id } = req.params;
@@ -116,8 +103,8 @@ app.put('/products/:id', async (req, res) => {
 
 // Add Products 
 app.post('/upload', upload.array('images'), async (req, res) => {
-    console.log('Files:', req.files); 
-    console.log('Body:', req.body);   
+    console.log('Files:', req.files);
+    console.log('Body:', req.body);
 
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({ error: 'No files uploaded' });
@@ -143,11 +130,126 @@ app.post('/upload', upload.array('images'), async (req, res) => {
         });
 
         await newProduct.save();
+
+        let category = await Category.findOne({ name: req.body.category });
+        if (!category) {
+
+            category = new Category({ name: req.body.category, products: [] });
+        }
+        category.products.push(newProduct._id.toString());
+        await category.save();
+
         res.status(201).json(newProduct);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
+
+// All Categories api start
+
+
+app.post('/categories', upload.single('image'), async (req, res) => {
+    console.log('File:', req.file);
+    console.log('Body:', req.body);
+
+    if (!req.file) {
+        
+        return res.status(400).json({ error: 'No image uploaded' });
+    }
+
+    try {
+        const uploadResult = await cloudinary.uploader.upload(req.file.path);
+        const imageUrl = uploadResult.secure_url;
+
+        const newCategory = new Category({
+            name: req.body.name,
+            products: req.body.products || [],
+            image: imageUrl
+        });
+
+        await newCategory.save();
+
+        res.status(201).json(newCategory);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get categories
+app.get('/categories', async (req, res) => {
+    try {
+        const categories = await Categories.find({});
+        res.status(200).json(categories);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+//   Update
+app.put('/categories/:id', upload.single('image'), async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+  
+      const uploadResult = await cloudinary.uploader.upload(req.file.path);
+      const imageUrl = uploadResult.secure_url;
+      updateData.image = imageUrl;
+  
+      const category = await Category.findByIdAndUpdate(id, updateData, {
+        new: true, 
+        runValidators: true 
+      });
+  
+      if (!category) {
+        return res.status(404).json({ error: 'Category not found' });
+      }
+  
+      res.status(200).json(category);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+// app.put('/categories/:id', async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const updateData = req.body;
+//         const category = await Category.findByIdAndUpdate(id, updateData, {
+//             new: true, // Return the updated document
+//             runValidators: true // Run validators on update
+//         });
+
+//         if (!category) {
+//             return res.status(404).json({ error: 'Category not found' });
+//         }
+
+//         res.status(200).json(category);
+//     } catch (error) {
+//         res.status(400).json({ error: error.message });
+//     }
+// });
+
+// Delete category
+app.delete('/categories/:id', async (req, res) => {
+    try {
+        const category = await Category.findByIdAndDelete(req.params.id);
+        if (!category) {
+            return res.status(404).send();
+        }
+        res.send(category);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+
+
+
+
+
+
+
+
+
 
 app.listen(port, () => {
     console.log("Working ", port)
