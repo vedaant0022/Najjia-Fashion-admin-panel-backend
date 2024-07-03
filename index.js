@@ -210,7 +210,7 @@ app.put('/categories/:id', upload.single('image'), async (req, res) => {
     }
   });
 
-// Delete category
+// Delete categories api
 app.delete('/categories/:id', async (req, res) => {
     try {
         const category = await Category.findByIdAndDelete(req.params.id);
