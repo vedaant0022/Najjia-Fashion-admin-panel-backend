@@ -8,8 +8,10 @@ const Products = require('./Models/Products');
 const Categories = require('./Models/Categories');
 const multer = require('multer');
 const Category = require('./Models/Categories');
+const User = require('./Models/User');
 const cloudinary = require('cloudinary').v2;
-
+const nodemailer = require('nodemailer');
+const Otp = require('./Models/UserOTP');
 
 const dburl = process.env.MONGOURL;
 mongoose.connect(dburl)
@@ -140,6 +142,49 @@ app.post('/upload', upload.array('images'), async (req, res) => {
         await category.save();
 
         res.status(201).json(newProduct);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+// Demo 
+app.post('/upload2', upload.array('images'), async (req, res) => {
+    console.log('Files:', req.files);
+    console.log('Body:', req.body);
+
+    if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ error: 'No files uploaded' });
+    }
+
+    try {
+        const imageUploadPromises = req.files.map(file => cloudinary.uploader.upload(file.path));
+        const uploadResults = await Promise.all(imageUploadPromises);
+
+        const imageUrls = uploadResults.map(result => result.secure_url);
+
+        const newProduct = {
+            title: req.body.title,
+            description: req.body.description,
+            price: req.body.price,
+            details: req.body.details,
+            brand: req.body.brand,
+            colors: req.body.colors,
+            sizes: req.body.sizes,
+            gender: req.body.gender,
+            images: imageUrls,
+            category: req.body.category
+        };
+
+        const savedProduct = await new Product(newProduct).save();
+
+        let category = await Category.findOne({ name: req.body.category });
+        if (!category) {
+            category = new Category({ name: req.body.category, products: [] });
+        }
+
+        category.products.push(savedProduct);
+        await category.save();
+
+        res.status(201).json(savedProduct);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

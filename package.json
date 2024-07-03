@@ -24,7 +24,8 @@
     "mongoose-sequence-plugin": "^1.0.5",
     "moongose": "^1.0.0",
     "multer": "^1.4.5-lts.1",
-    "node-mailer": "^0.1.1"
+    "node-mailer": "^0.1.1",
+    "nodemailer": "^6.9.14"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
