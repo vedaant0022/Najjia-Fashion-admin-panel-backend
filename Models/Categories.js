@@ -7,7 +7,6 @@ const categorySchema = new mongoose.Schema({
     unique: true
   },
   products:[{
-    // type: String
     type: mongoose.Schema.Types.Mixed,
   }],
   image: {

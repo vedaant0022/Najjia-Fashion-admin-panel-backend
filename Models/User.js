@@ -19,7 +19,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
     match: [/^\d{10}$/, 'Please enter a valid phone number']
-  }
+  },
+  wishlist:[{
+    type: mongoose.Schema.Types.Mixed,
+  }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
