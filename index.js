@@ -185,6 +185,48 @@ app.post('/wishlist', async (req, res) => {
     }
   });
 
+//   Fetch the wishlist item
+app.get('/wishlist/:username', async (req, res) => {
+    const { username } = req.params;
+  
+    try {
+      const user = await User.findOne({ username }).populate('wishlist');
+      if (!user) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+  
+      res.status(200).json({ wishlist: user.wishlist });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'An error occurred while fetching the wishlist.' });
+    }
+  });
+
+//   Remove Item from Wishlist
+app.delete('/wishlist/:username/:itemId', async (req, res) => {
+    const { username, itemId } = req.params;
+  
+    try {
+      // Find the user by username
+      const user = await User.findOne({ username });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+  
+      // Remove the wishlist item from the user's wishlist array
+      user.wishlist = user.wishlist.filter(item => item._id.toString() !== itemId);
+      await user.save();
+  
+      // Remove the wishlist item from the Wishlist collection
+      await Wishlist.findByIdAndDelete(itemId);
+  
+      res.status(200).json({ message: 'Wishlist item removed successfully.' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'An error occurred while removing the wishlist item.' });
+    }
+  });
+
 
 
 // List Products
