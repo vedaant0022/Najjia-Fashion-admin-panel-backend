@@ -149,7 +149,7 @@ app.post('/verifyotp', async (req, res) => {
 app.post('/wishlist', async (req, res) => {
     const { username, title, description, price, details, brand, colors, sizes, gender, images, category } = req.body;
   
-    if (!username || !title || !description || !price) {
+    if (!username || !title || !price) {
       return res.status(400).json({ error: 'Username, title, description, and price are required.' });
     }
   
