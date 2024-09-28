@@ -13,6 +13,7 @@ const nodemailer = require('nodemailer');
 const User = require('./Models/User');
 const Otp = require('./Models/UserOTP');
 const Wishlist = require('./Models/Wishlist');
+const Downloads = require('./Models/Downloads');
 
 
 
@@ -424,11 +425,60 @@ app.delete('/categories/:id', async (req, res) => {
 
 
 
+// Count 
+app.get('/usercount', async (req, res) => {
+  try {
+    const userCount = await User.countDocuments(); // Get the count of users in the database
+    res.status(200).json({ userCount });
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching user count' });
+  }
+});
 
+app.get('/categorycount', async (req, res) => {
+  try {
+    const category = await Category.countDocuments(); // Get the count of users in the database
+    res.status(200).json({ category });
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching user count' });
+  }
+});
 
+app.get('/productcount', async (req, res) => {
+  try {
+    const product = await Products.countDocuments(); // Get the count of users in the database
+    res.status(200).json({ product });
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching user count' });
+  }
+});
 
+app.post('/downlaods', async (req, res) => {
+  try {
+    let counter = await Downloads.findOne();
+    if (!counter) {
+      counter = new Downloads({ count: 1 });
+    } else {
+      counter.count += 1;
+    }
+    await counter.save();
+    res.status(200).json({ count: counter.count });
+  } catch (err) {
+    res.status(500).json({ error: 'Error incrementing count' });
+  }
+});
 
-
+app.get('/downlaods', async (req, res) => {
+  try {
+    const counter = await Downloads.findOne();
+    if (!counter) {
+      return res.status(200).json({ count: 0 });
+    }
+    res.status(200).json({ count: counter.count });
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching count' });
+  }
+});
 
 
 app.listen(port, () => {
